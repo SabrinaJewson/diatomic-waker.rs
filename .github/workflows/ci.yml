@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 env:
-  RUSTFLAGS: -Dwarnings
+  RUSTFLAGS: -Dwarnings -Ctarget-feature=+cmpxchg16b
 
 jobs:
   check:
@@ -17,7 +17,7 @@ jobs:
       matrix:
         rust:
           - stable
-          - 1.56.1
+          - 1.84.0
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -28,7 +28,10 @@ jobs:
           toolchain: ${{ matrix.rust }}
 
       - name: Run cargo check
-        run: cargo check
+        run: cargo check --no-default-features
+
+      - name: Run cargo check --all-features
+        run: cargo check --all-features
 
   test:
     name: Test suite
@@ -40,7 +43,10 @@ jobs:
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Run cargo test
+      - name: Run cargo test --features alloc
+        run: cargo test --no-default-features --features alloc
+
+      - name: Run cargo test --all-features
         run: cargo test --all-features
 
   loom-light:

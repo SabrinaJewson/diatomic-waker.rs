@@ -30,6 +30,11 @@
 //! [`WakeSink`] and [`WakeSource`]. It can be made `no-std`-compatible by
 //! specifying `default-features = false`.
 //!
+//! The default-enabled feature `atomic` uses the [`portable-atomic`] crate
+//! to switch to an optimized implementation based on 128-bit atomics on supported
+//! platforms (e.g. x86\_64 with cmpxchg16b, all aarch64, or riscv64 with zacas).
+//!
+//![`portable-atomic`]: https://docs.rs/portable-atomic
 //!
 //! # Examples
 //!
@@ -160,7 +165,6 @@ extern crate alloc;
 #[cfg(feature = "alloc")]
 mod arc_waker;
 mod borrowed_waker;
-mod loom_exports;
 #[deprecated(
     since = "0.2.0",
     note = "items from this module are now available in the root module"
@@ -172,6 +176,64 @@ mod waker;
 pub use arc_waker::{WakeSink, WakeSource};
 pub use borrowed_waker::{WakeSinkRef, WakeSourceRef};
 pub use waker::{DiatomicWaker, WaitUntil};
+
+mod impl_lockfree;
+
+cfg_has_required_atomics! {
+    mod impl_atomic;
+}
+
+cfg_no_required_atomics! {
+    mod impl_atomic {
+        #[derive(Debug)]
+        pub(crate) enum DiatomicWaker {}
+
+        impl DiatomicWaker {
+            pub(crate) const fn new() -> [Self; ENABLE as usize] {
+                []
+            }
+            pub(crate) fn notify(&self) {
+                match *self {}
+            }
+            pub(crate) fn register(&self, _: &core::task::Waker) {
+                match *self {}
+            }
+            pub(crate) fn unregister(&self) {
+                match *self {}
+            }
+        }
+
+        pub(crate) const ENABLE: bool = false;
+    }
+}
+
+#[cfg(all(feature = "atomic", target_pointer_width = "32"))]
+use portable_atomic::cfg_no_atomic_64 as cfg_no_required_atomics;
+
+#[cfg(all(feature = "atomic", target_pointer_width = "32"))]
+use portable_atomic::cfg_has_atomic_64 as cfg_has_required_atomics;
+
+#[cfg(all(feature = "atomic", target_pointer_width = "64"))]
+use portable_atomic::cfg_no_atomic_128 as cfg_no_required_atomics;
+
+#[cfg(all(feature = "atomic", target_pointer_width = "64"))]
+use portable_atomic::cfg_has_atomic_128 as cfg_has_required_atomics;
+
+#[cfg(not(feature = "atomic"))]
+macro_rules! cfg_no_required_atomics {
+    ($($t:tt)*) => { $($t)* };
+}
+#[cfg(not(feature = "atomic"))]
+use cfg_no_required_atomics;
+
+#[cfg(not(feature = "atomic"))]
+macro_rules! cfg_has_required_atomics {
+    ($($t:tt)*) => {};
+}
+#[cfg(not(feature = "atomic"))]
+use cfg_has_required_atomics;
+
+mod loom_exports;
 
 /// Tests.
 #[cfg(all(test, not(diatomic_waker_loom)))]

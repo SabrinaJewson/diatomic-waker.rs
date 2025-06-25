@@ -8,7 +8,7 @@ name = "diatomic-waker"
 version = "0.2.3"
 authors = ["Asynchronics and contributors"]
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.84"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/asynchronics/diatomic-waker"
 readme = "README.md"
@@ -19,8 +19,12 @@ categories = ["asynchronous", "concurrency"]
 keywords = ["async", "waker", "atomic", "no_std", "no_alloc"]
 
 [features]
-default = ["alloc"]
+default = ["alloc", "atomic"]
 alloc = []
+atomic = ["portable-atomic"]
+
+[dependencies]
+portable-atomic = { version = "1.11.1", optional = true }
 
 [dev-dependencies]
 pollster = "0.3"

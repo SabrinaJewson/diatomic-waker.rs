@@ -1,3 +1,11 @@
+# Unreleased
+
+- Support using 128-bit atomics on platforms that support it. ([#17])
+- Bump MSRV to 1.84 ([#17])
+
+[#17]: https://github.com/asynchronics/diatomic-waker/pull/17
+
+
 # 0.2.3 (2024-09-08)
 
 - Remove `Unpin` bound on `wait_until` methods ([#15]).

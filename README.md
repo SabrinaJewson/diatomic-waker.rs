@@ -40,6 +40,13 @@ By default, this crate enables the `alloc` feature to provide the owned
 `WakeSink` and `WakeSource`. It can be made `no-std`-compatible by specifying
 `default-features = false`.
 
+The default-enabled feature `atomic` uses the [`portable-atomic`] crate
+to switch to an optimized implementation based on 128-bit atomics on supported
+platforms (e.g. x86\_64 with cmpxchg16b, all aarch64, or riscv64 with zacas).
+
+[`portable-atomic`]: https://docs.rs/portable-atomic
+
+
 ## Example
 
 A multi-producer, single-consumer channel of capacity 1 for sending
