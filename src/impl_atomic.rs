@@ -18,6 +18,7 @@ pub(crate) const ENABLE: bool =
     AtomicTwoUsize::is_always_lock_free() && cfg!(not(all(test, diatomic_waker_loom)));
 
 impl DiatomicWaker {
+    #[cfg(not(all(test, diatomic_waker_loom)))]
     pub(crate) const fn new() -> [Self; ENABLE as usize] {
         [const {
             Self {

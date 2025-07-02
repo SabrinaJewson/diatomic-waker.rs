@@ -37,6 +37,7 @@ impl DiatomicWaker {
     }
 
     #[cfg(all(test, diatomic_waker_loom))]
+    #[expect(missing_docs)]
     pub fn new() -> Self {
         Self {
             atomic: [],
