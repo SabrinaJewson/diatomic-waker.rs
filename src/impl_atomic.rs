@@ -28,6 +28,13 @@ impl DiatomicWaker {
     }
 
     pub(crate) fn notify(&self) {
+        // Implement a fast path to avoid dropping the waker if it's inactive. This can avoid
+        // cloning wakers later on.
+        // Ordering: We don't have any data dependencies here, so `Relaxed` is sufficient.
+        if self.inner.load(Ordering::Relaxed) & 1 != 0 {
+            return;
+        }
+
         // Ordering:
         // - Acquire is necessary since we access the `Waker`'s methods after this, thus need to
         //   acquire the current shared state of the waker.
