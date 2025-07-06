@@ -28,6 +28,7 @@ portable-atomic = { version = "1.11.1", optional = true }
 
 [dev-dependencies]
 pollster = "0.3"
+criterion = "0.6.0"
 
 [target.'cfg(diatomic_waker_loom)'.dev-dependencies]
 waker-fn = "1.1"
@@ -39,3 +40,7 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(diatomic_waker_loom)'] }
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[[bench]]
+name = "benches"
+harness = false
